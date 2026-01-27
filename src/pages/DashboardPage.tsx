@@ -39,7 +39,7 @@ export const DashboardPage = () => {
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   // Assuming prospects-ui runs on port 5173
-  const referralLink = `http://localhost:5173/?ref=${user?.adminId}`;
+  const referralLink = `https://sniperbusinessebook.online/?ref=${user?.adminId}`;
 
   // Polling interval: 5 minutes
   const POLLING_INTERVAL_MS = 5 * 60 * 1000;
