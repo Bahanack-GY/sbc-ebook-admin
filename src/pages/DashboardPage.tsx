@@ -29,9 +29,16 @@ interface Prospect {
   createdAt: string;
 }
 
+interface Ebook {
+    _id: string;
+    title: string;
+    coverUrl: string;
+}
+
 export const DashboardPage = () => {
   const { user } = useAuth();
   const [prospects, setProspects] = useState<Prospect[]>([]);
+  const [ebooks, setEbooks] = useState<Ebook[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [chartData, setChartData] = useState<any[]>([]);
   const [lastSynced, setLastSynced] = useState<Date | null>(null);
@@ -47,14 +54,16 @@ export const DashboardPage = () => {
   const fetchData = useCallback(async (showSyncIndicator = false) => {
     if (showSyncIndicator) setIsSyncing(true);
     try {
-      const [prospectsRes, statsRes] = await Promise.all([
+      const [prospectsRes, statsRes, ebooksRes] = await Promise.all([
         api.get('/prospects'),
-        api.get('/prospects/stats')
+        api.get('/prospects/stats'),
+        api.get('/ebooks')
       ]);
       const sortedProspects = prospectsRes.data.sort((a: Prospect, b: Prospect) => 
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       setProspects(sortedProspects);
+      setEbooks(ebooksRes.data);
       setStats(statsRes.data);
       setLastSynced(new Date());
 
@@ -140,6 +149,12 @@ export const DashboardPage = () => {
     alert("Lien copié dans le presse-papiers !");
   };
 
+  const copyEbookLink = (ebookId: string) => {
+    const link = `https://sniperbusinessebook.online/capture/${ebookId}?ref=${user?.referralCode || user?.adminId}`; // Use referralCode if available, fallback to ID
+    navigator.clipboard.writeText(link);
+    alert("Lien Ebook copié !");
+  }
+
   return (
     <AdminLayout>
       <div className="space-y-6 md:space-y-8">
@@ -166,6 +181,46 @@ export const DashboardPage = () => {
                 </div>
             </div>
         </motion.div>
+
+        {/* Ebook Links Grid */}
+        <div className="space-y-4">
+            <h2 className="text-lg font-bold text-slate-900">Vos Liens de Parrainage Ebooks</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {ebooks.map((ebook, index) => (
+                    <motion.div 
+                        key={ebook._id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 * index }}
+                    >
+                        <Card className="p-4 flex items-center gap-4 hover:shadow-md transition-shadow border border-slate-200">
+                             <div className="w-16 h-20 bg-slate-100 rounded-md shrink-0 overflow-hidden">
+                                {ebook.coverUrl ? (
+                                    <img src={ebook.coverUrl} alt={ebook.title} className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-xs text-slate-400">No Cover</div>
+                                )}
+                             </div>
+                             <div className="flex-1 min-w-0">
+                                <h3 className="font-medium text-slate-900 truncate" title={ebook.title}>{ebook.title}</h3>
+                                <p className="text-xs text-slate-500 mb-2 truncate">
+                                    ID: {ebook._id}
+                                </p>
+                                <Button 
+                                    size="sm" 
+                                    variant="outline" 
+                                    className="w-full text-xs"
+                                    onClick={() => copyEbookLink(ebook._id)}
+                                >
+                                    <Copy className="w-3 h-3 mr-2" />
+                                    Copier le lien
+                                </Button>
+                             </div>
+                        </Card>
+                    </motion.div>
+                ))}
+            </div>
+        </div>
 
         {/* Sync Status */}
         <div className="flex items-center gap-2 text-sm text-slate-500">

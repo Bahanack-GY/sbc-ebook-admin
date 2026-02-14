@@ -26,7 +26,7 @@ export const LoginPage = () => {
 
     try {
       const res = await api.post('/auth/login', { username, password });
-      login(res.data.access_token, res.data.adminId, res.data.role);
+      login(res.data.access_token, res.data.adminId, res.data.role, res.data.referralCode);
       navigate('/');
     } catch (err: any) {
       if (err.response?.data?.message === 'Account suspended') {

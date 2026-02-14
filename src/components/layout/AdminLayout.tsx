@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { LayoutDashboard, LogOut, User, Menu, X } from 'lucide-react';
+import { LayoutDashboard, LogOut, User, Menu, X, Settings } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -29,6 +29,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const navItems = [
     { icon: LayoutDashboard, label: 'Tableau de bord', path: '/' },
     { icon: User, label: 'Prospects', path: '/prospects' },
+    { icon: Settings, label: 'Paramètres', path: '/settings' },
   ];
 
   const NavItem = ({ icon: Icon, label, path, active }: any) => (

@@ -1,7 +1,11 @@
 import axios from 'axios';
 
+// export const api = axios.create({
+//     baseURL: 'https://api.sniperbusinessebook.online/', 
+// });
+
 export const api = axios.create({
-    baseURL: 'https://api.sniperbusinessebook.online/', 
+    baseURL: 'http://localhost:3000/', 
 });
 
 api.interceptors.request.use((config) => {
