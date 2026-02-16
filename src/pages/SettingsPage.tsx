@@ -8,10 +8,10 @@ import { Save, User, Smartphone, Tag } from 'lucide-react';
 import { AdminLayout } from '../components/layout/AdminLayout';
 
 export const SettingsPage = () => {
-    const { user } = useAuth();
+//     const { user } = useAuth();
     const [formData, setFormData] = useState({
-        referralCode: '',
-        phoneNumber: '',
+        salesPageLink: '',
+        whatsappGroupLink: '',
         username: ''
     });
     const [loading, setLoading] = useState(false);
@@ -19,20 +19,22 @@ export const SettingsPage = () => {
 
     // Fetch current profile data
     useEffect(() => {
-        // We can use the user object from context if it has the info, 
-        // or fetch from an endpoint. Since we just added fields, user context might be stale or incomplete.
-        // Ideally we should have a /auth/me endpoint, but for now let's rely on what we can get or maybe fetch if needed.
-        // Actually, let's fetch the profile or just use what we have if we update the context.
-        // For now, let's assume we might need to fetch it. But we don't have a specific "get my profile" endpoint unless we use the list one filtering...
-        // Wait, I implemented PATCH /admins/profile but not GET /admins/profile explicitly. 
-        // However, the AuthContext usually decodes the token. The token won't have the new fields unless we refresh it.
-        // Let's add a GET /admins/profile endpoint in the backend? Or just use what we have?
-        // Ah, I missed adding a GET endpoint for the profile in the plan.
-        // I can just use GET /admins (list) and find stats, but that's inefficient.
-        // Let's quickly add GET /admins/profile to the backend in the next step or now.
-        // For now, let's assume I will add it or I'll just rely on the user inputting data.
-        // Actually, it's better to show existing data.
-        // I'll add GET /admins/profile to the backend quickly as well.
+        const fetchProfile = async () => {
+            try {
+                const { data } = await api.get('/admins/profile');
+                if (data) {
+                    setFormData(prev => ({
+                        ...prev,
+                        salesPageLink: data.salesPageLink || '',
+                        whatsappGroupLink: data.whatsappGroupLink || '',
+                        username: data.username || prev.username
+                    }));
+                }
+            } catch (err) {
+                console.error("Failed to fetch profile", err);
+            }
+        };
+        fetchProfile();
     }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,8 +48,8 @@ export const SettingsPage = () => {
 
         try {
             await api.patch('/admins/profile', {
-                referralCode: formData.referralCode,
-                phoneNumber: formData.phoneNumber
+                salesPageLink: formData.salesPageLink,
+                whatsappGroupLink: formData.whatsappGroupLink
             });
             
             setMessage({ type: 'success', text: 'Profil mis à jour avec succès !' });
@@ -78,7 +80,7 @@ export const SettingsPage = () => {
                              </label>
                              <Input 
                                 disabled
-                                value={user?.username || ''}
+                                value={formData.username}
                                 className="bg-slate-100 text-slate-500"
                              />
                         </div>
@@ -87,28 +89,29 @@ export const SettingsPage = () => {
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
                                     <Tag className="w-4 h-4" />
-                                    Code Parrain
+                                    Lien de votre page de vente
                                 </label>
                                 <Input 
-                                    name="referralCode"
-                                    placeholder="Ex: PROMO2024"
-                                    value={formData.referralCode}
+                                    name="salesPageLink"
+                                    placeholder="https://sniperbuisnesscenter.com/connexion"
+                                    value={formData.salesPageLink}
                                     onChange={handleChange}
                                 />
-                                <p className="text-xs text-slate-400">Ce code sera utilisé pour vos liens de parrainage (optionnel).</p>
+                                <p className="text-xs text-slate-400">Ce lien sera utilisé pour le bouton "Je veux comprendre la SBC maintenant".</p>
                             </div>
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
                                     <Smartphone className="w-4 h-4" />
-                                    Numéro de Téléphone
+                                    Lien de votre groupe WhatsApp
                                 </label>
                                 <Input 
-                                    name="phoneNumber"
-                                    placeholder="+33 6 12 34 56 78"
-                                    value={formData.phoneNumber}
+                                    name="whatsappGroupLink"
+                                    placeholder="https://chat.whatsapp.com/..."
+                                    value={formData.whatsappGroupLink}
                                     onChange={handleChange}
                                 />
+                                <p className="text-xs text-slate-400">Ce lien sera utilisé pour le bouton "Je rejoins le groupe WhatsApp SBC".</p>
                             </div>
                         </div>
 
