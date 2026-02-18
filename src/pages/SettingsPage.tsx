@@ -47,8 +47,13 @@ export const SettingsPage = () => {
         setMessage(null);
 
         try {
+            let formattedSalesLink = formData.salesPageLink;
+            if (formattedSalesLink && !/^https?:\/\//i.test(formattedSalesLink)) {
+                formattedSalesLink = 'https://' + formattedSalesLink;
+            }
+
             await api.patch('/admins/profile', {
-                salesPageLink: formData.salesPageLink,
+                salesPageLink: formattedSalesLink,
                 whatsappGroupLink: formData.whatsappGroupLink
             });
             
